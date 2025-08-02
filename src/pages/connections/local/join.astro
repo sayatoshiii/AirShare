@@ -9,8 +9,11 @@ import Layout from "../../../layouts/Layout.astro";
     <input id="localMessage" type="text" />
     <a onclick="sendMessageLocalNetwork()">send message</a>
 
+    <div style="display: none;" id="qr-reader-results"></div>
+
     <script>
-        import { setupClient } from "./local";
+        import { setupClient, setupClientClipboard } from "./local";
         setupClient(document);
+        setupClientClipboard(document);
     </script>
 </Layout>

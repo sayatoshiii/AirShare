@@ -6,4 +6,14 @@ export const CONFIG = {
             },
         },
     },
+    mime: {
+        image: [
+            "image/apng",
+            "image/png",
+            "image/jpeg",
+            "image/gif",
+            "image/webp",
+            "image/svg+xml",
+        ],
+    },
 };

@@ -8,6 +8,9 @@ import {
     startLocalNetworkSenderConnection,
 } from "../../../../utils/client/connections/local/sender";
 import { MessageType } from "../../../../utils/client/connections/shared/types";
+import { handlePaste } from "../../../../utils/client/tools/clipboard";
+import { CONFIG } from "../../../../utils/config";
+import { Html5Qrcode } from "html5-qrcode";
 
 declare global {
     interface Window {
@@ -44,6 +47,42 @@ export const setupHost = async (document?: Document) => {
     };
 };
 
+export const setupHostClipboard = (document?: Document) =>
+    handlePaste(async () => {
+        const clipboard: ClipboardItem[] = await navigator.clipboard.read();
+        for (const entry of clipboard) {
+            for (const type of entry.types) {
+                const blob = await entry.getType(type);
+                if (CONFIG.mime.image.includes(type)) {
+                    const file = new File([blob], "clipboard-image.png", {
+                        type: blob.type,
+                    });
+
+                    const html5QrCode = new Html5Qrcode("qr-reader-results");
+
+                    html5QrCode
+                        .scanFile(file, true)
+                        .then((decodedText) => {
+                            let answerSDP = document?.getElementById(
+                                "answerSDP",
+                            ) as HTMLInputElement | null;
+
+                            if (!answerSDP) return;
+
+                            answerSDP.value = decodedText;
+                            window?.completeLocalNetworkConnection?.();
+                        })
+                        .catch((err) => {
+                            console.error(
+                                "Clipboard did not contain a valid QR Code...",
+                                err,
+                            );
+                        });
+                }
+            }
+        }
+    });
+
 export const setupClient = async (document?: Document) => {
     const peerConnection = await initialiseConnection();
 
@@ -65,3 +104,39 @@ export const setupClient = async (document?: Document) => {
         sendMessageLocalNetwork(MessageType.TEXT, message);
     };
 };
+
+export const setupClientClipboard = (document?: Document) =>
+    handlePaste(async () => {
+        const clipboard: ClipboardItem[] = await navigator.clipboard.read();
+        for (const entry of clipboard) {
+            for (const type of entry.types) {
+                const blob = await entry.getType(type);
+                if (CONFIG.mime.image.includes(type)) {
+                    const file = new File([blob], "clipboard-image.png", {
+                        type: blob.type,
+                    });
+
+                    const html5QrCode = new Html5Qrcode("qr-reader-results");
+
+                    html5QrCode
+                        .scanFile(file, true)
+                        .then((decodedText) => {
+                            let offerSDP = document?.getElementById(
+                                "offerSDP",
+                            ) as HTMLInputElement | null;
+
+                            if (!offerSDP) return;
+
+                            offerSDP.value = decodedText;
+                            window?.startLocalNetworkReceiverConnection();
+                        })
+                        .catch((err) => {
+                            console.error(
+                                "Clipboard did not contain a valid QR Code...",
+                                err,
+                            );
+                        });
+                }
+            }
+        }
+    });

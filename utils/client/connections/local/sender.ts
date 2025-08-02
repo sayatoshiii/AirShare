@@ -60,8 +60,6 @@ export const setupICE = (peerConnection: RTCPeerConnection) => {
         img.style.height = "256px";
 
         document.body.appendChild(img);
-
-        console.log("Offer SDP:", offerSDP);
     };
 };
 

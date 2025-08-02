@@ -70,7 +70,5 @@ export const setupLocalReceiverICE = (peerConnection: RTCPeerConnection) => {
         img.style.height = "256px";
 
         document.body.appendChild(img);
-
-        console.log("Answer SDP:", answerSDP);
     };
 };
