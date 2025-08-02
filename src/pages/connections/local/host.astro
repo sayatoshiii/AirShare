@@ -2,4 +2,17 @@
 import Layout from "../../../layouts/Layout.astro";
 ---
 
-<Layout title={"Host"}> test </Layout>
+<Layout title={"Host"}>
+    <a onclick="startLocalNetworkSenderConnection()">host connection</a>
+    <br />
+    <input id="answerSDP" type="text" />
+    <a onclick="completeLocalNetworkConnection()">accept answer</a>
+    <br />
+    <input id="localMessage" type="text" />
+    <a onclick="sendMessageLocalNetwork()">send message</a>
+
+    <script>
+        import { setupHost } from "./local";
+        setupHost(document);
+    </script>
+</Layout>

@@ -1,0 +1,16 @@
+---
+import Layout from "../../../layouts/Layout.astro";
+---
+
+<Layout title={"Join"}>
+    <a onclick="startLocalNetworkReceiverConnection()">receive connection</a>
+    <input id="offerSDP" type="text" />
+    <br />
+    <input id="localMessage" type="text" />
+    <a onclick="sendMessageLocalNetwork()">send message</a>
+
+    <script>
+        import { setupClient } from "./local";
+        setupClient(document);
+    </script>
+</Layout>
