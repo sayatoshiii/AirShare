@@ -1,3 +1,5 @@
+import { MessageType, type Message } from "../shared/types";
+
 let dataChannel: RTCDataChannel | null = null;
 
 export const setLocalNetworkDataChannel = (channel: RTCDataChannel) => {
@@ -14,12 +16,25 @@ export const initialiseConnection = async (): Promise<RTCPeerConnection> =>
         iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
     });
 
-export const sendMessageLocalNetwork = (document?: Document) => {
-    const message = (
-        document?.getElementById("localMessage") as HTMLInputElement | null
-    )?.value;
-    if (!message) return;
-
+export const sendMessageLocalNetwork = (type: MessageType, message: string) => {
     if (!dataChannel) return;
-    dataChannel.send(message);
+    dataChannel.send(
+        JSON.stringify({
+            type,
+            message,
+        } as Message),
+    );
+};
+
+export const handleLocalNetworkMessage = (serialisedMessage: string) => {
+    const message: Message = JSON.parse(serialisedMessage);
+
+    switch (message.type) {
+        case MessageType.CONNECTED:
+            console.info("Acknowledged peer connection!");
+            break;
+        case MessageType.TEXT:
+            console.info(`Received text '${message?.message}'`);
+            break;
+    }
 };

@@ -1,5 +1,10 @@
 import QRCode from "qrcode";
-import { setLocalNetworkDataChannel } from "./connection";
+import {
+    handleLocalNetworkMessage,
+    setLocalNetworkDataChannel,
+} from "./connection";
+import { MessageType, type Message } from "../shared/types";
+import { CONFIG } from "../../../config";
 
 export const startLocalNetworkReceiverConnection = async (
     peerConnection: RTCPeerConnection,
@@ -17,14 +22,21 @@ export const setupLocalReceiverDataChannel = (
 ) => {
     peerConnection.ondatachannel = (event) => {
         const dataChannel = event.channel;
+        const dataChannelName = CONFIG.connection.local.dataChannel.name;
 
         dataChannel.onopen = () => {
-            console.info("Responder Data Channel Opened!");
-            dataChannel.send("Hello from Responder!");
+            console.info(`Data channel '${dataChannelName}' opened!`);
+            dataChannel.send(
+                JSON.stringify({
+                    type: MessageType.CONNECTED,
+                    message: "Receiver connected!",
+                } as Message),
+            );
         };
 
         dataChannel.onmessage = (event) => {
-            console.log("Received from Initiator:", event.data);
+            console.log("Message from host:", event.data);
+            handleLocalNetworkMessage(event.data);
         };
 
         setLocalNetworkDataChannel(dataChannel);

@@ -1,5 +1,10 @@
 import QRCode from "qrcode";
-import { setLocalNetworkDataChannel } from "./connection";
+import {
+    handleLocalNetworkMessage,
+    setLocalNetworkDataChannel,
+} from "./connection";
+import { CONFIG } from "../../../config";
+import { MessageType, type Message } from "../shared/types";
 
 export const startLocalNetworkSenderConnection = async (
     peerConnection: RTCPeerConnection,
@@ -14,17 +19,23 @@ export const startLocalNetworkSenderConnection = async (
 export const setupLocalDataChannel = async (
     peerConnection: RTCPeerConnection,
 ) => {
-    const dataChannelName = "air-share-local";
+    const dataChannelName = CONFIG.connection.local.dataChannel.name;
 
     const dataChannel = peerConnection.createDataChannel(dataChannelName);
 
     dataChannel.onopen = () => {
         console.info(`Data channel '${dataChannelName}' opened!`);
-        dataChannel.send("Test");
+        dataChannel.send(
+            JSON.stringify({
+                type: MessageType.CONNECTED,
+                message: "Host connected!",
+            } as Message),
+        );
     };
 
     dataChannel.onmessage = (event) => {
-        console.log("Received from peer:", event.data);
+        console.log("Received from receiver:", event.data);
+        handleLocalNetworkMessage(event.data);
     };
 
     setLocalNetworkDataChannel(dataChannel);
@@ -60,5 +71,7 @@ export const completeLocalNetworkConnection = async (
 ) => {
     const answerDesc = new RTCSessionDescription(JSON.parse(atob(answerSDP)));
     await peerConnection.setRemoteDescription(answerDesc);
-    console.log("Answer SDP applied. Waiting for DataChannel to open...");
+    console.info(
+        "Answer SDP from receiver applied, establishing connection...",
+    );
 };
